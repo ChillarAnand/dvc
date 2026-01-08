@@ -41,18 +41,6 @@ class RemoteNotFoundError(RemoteConfigError):
     pass
 
 
-class MachineConfigError(ConfigError):
-    pass
-
-
-class NoMachineError(MachineConfigError):
-    pass
-
-
-class MachineNotFoundError(MachineConfigError):
-    pass
-
-
 @memoize
 def get_compiled_schema():
     from voluptuous import Schema
@@ -347,12 +335,6 @@ class Config(dict):
                     "key_path": func,
                 }
             },
-            "machine": {
-                str: {
-                    "startup_script": func,
-                    "setup_script": func,
-                }
-            },
         }
         return Schema(dirs_schema, extra=ALLOW_EXTRA)(conf)
 
@@ -403,10 +385,10 @@ class Config(dict):
 
 
 def _parse_named(conf):
-    result: dict[str, dict] = {"remote": {}, "machine": {}, "db": {}}
+    result: dict[str, dict] = {"remote": {}, "db": {}}
 
     for section, val in conf.items():
-        match = re_find(r'^\s*(remote|machine|db)\s*"(.*)"\s*$', section)
+        match = re_find(r'^\s*(remote|db)\s*"(.*)"\s*$', section)
         if match:
             key, name = match
             result[key][name] = val
@@ -421,7 +403,7 @@ def _pack_named(conf):
     result = compact(conf)
 
     # Transform remote.name -> 'remote "name"'
-    for key in ("remote", "machine", "db"):
+    for key in ("remote", "db"):
         for name, val in conf[key].items():
             result[f'{key} "{name}"'] = val
         result.pop(key, None)

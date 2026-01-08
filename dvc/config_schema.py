@@ -293,7 +293,6 @@ SCHEMA = {
         Optional("experiments", description=DEPRECATED): Bool,  # obsoleted
         Optional("check_update", default=True): Bool,
         "site_cache_dir": str,
-        "machine": Lower,
     },
     "cache": {
         Marker("local", description=DEPRECATED): str,  # obsoleted
@@ -322,28 +321,9 @@ SCHEMA = {
     "index": {
         Marker("dir", description=DEPRECATED): str,  # obsoleted
     },
-    "machine": {
-        str: {
-            "cloud": All(Lower, Choices("aws", "azure")),
-            "region": All(Lower, Choices("us-west", "us-east", "eu-west", "eu-north")),
-            "image": str,
-            "spot": Bool,
-            "spot_price": Coerce(float),
-            "instance_hdd_size": Coerce(int),
-            "instance_type": Lower,
-            "instance_gpu": Lower,
-            "ssh_private": str,
-            "startup_script": str,
-            "setup_script": str,
-        },
-    },
     # section for experimental features
     # only specified keys are validated, others get logged and then ignored/removed
-    "feature": FeatureSchema(
-        {
-            Optional("machine", default=False): Bool,
-        },
-    ),
+    "feature": FeatureSchema({}),
     "plots": {
         "html_template": str,
         Optional("auto_open", default=False): Bool,
@@ -389,8 +369,6 @@ SCHEMA = {
 
 def config_vars_for_completion(d: dict = SCHEMA, path: str = "") -> "Iterator[str]":
     for k, v in d.items():
-        if k in ("machine", "feature"):
-            continue
         if isinstance(k, Marker):
             if k.description == DEPRECATED:
                 continue
